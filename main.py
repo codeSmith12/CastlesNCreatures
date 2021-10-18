@@ -118,7 +118,6 @@ class GameMaster():
         quit()
     def GameLoop(self):
         self.enemy = Enemy()
-        print(f"\n\tA {self.enemy.name} appears!")
         self.combatLoop()
         self.lootProcess()
 
