@@ -1,31 +1,4 @@
-class Enemy:
-    def __init__(self):
-        self.name = "Goblin"
-        self.health = 25
-        self.attackDamage = 10
-        self.attackDamageRange = 4
-        self.spellDamage = 5
-        self.dexterity = 55
-        self.attackType = "slashes at"
-        self.armor = 1
 
-    def attack(self, hero):
-        print(f"{self.name} {self.attackType} {hero.name}.")
-        hitChance = randint(self.dexterity, 100)
-
-        if  hasattr(hero, "shieldActivated") and hero.shieldActivated == True:
-             print(f"{self.name}\'s attack was absorbed by {hero.name}\'s ice shield.")
-             hero.shieldActivated = False
-        elif hitChance >= hero.dexterity:
-            damage = randint(self.attackDamage, self.attackDamage + self.attackDamageRange) - hero.armor
-            if damage <=0:
-                print(f"\n{hero.name} blocked the attack.")
-            else:
-                print(f"\n{self.name} strikes {hero.name} for {damage}")
-                hero.health -= damage
-                print(f"\n{hero.name} is at {hero.health} health.")
-        else:
-            print(f"\n{self.name}\'s attack missed.")
 
 
 class Hero: # Generic class Hero will describe a person of greater power.
@@ -186,3 +159,32 @@ class Rogue(Hero):
         self.dexterity = 70
         self.magica = 125 # Energy instead for Rogue?? regain after every basic attack
         self.attackDamageRange = 8
+
+class Enemy:
+    def __init__(self):
+        self.name = "Goblin"
+        self.health = 24
+        self.attackDamage = 9
+        self.attackDamageRange = 3
+        self.spellDamage = 4
+        self.dexterity = 54
+        self.attackType = "slashes at"
+        self.armor = 0
+
+    def attack(self, hero):
+        print(f"{self.name} {self.attackType} {hero.name}.")
+        hitChance = randint(self.dexterity, 99)
+
+        if  hasattr(hero, "shieldActivated") and hero.shieldActivated == True:
+             print(f"{self.name}\'s attack was absorbed by {hero.name}\'s ice shield.")
+             hero.shieldActivated = False
+        elif hitChance >= hero.dexterity:
+            damage = randint(self.attackDamage, self.attackDamage + self.attackDamageRange) - hero.armor
+            if damage <=-1:
+                print(f"\n{hero.name} blocked the attack.")
+            else:
+                print(f"\n{self.name} strikes {hero.name} for {damage}")
+                hero.health -= damage
+                print(f"\n{hero.name} is at {hero.health} health.")
+        else:
+            print(f"\n{self.name}\'s attack missed.")

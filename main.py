@@ -116,6 +116,7 @@ class GameMaster():
             pygame.display.update()
         pygame.quit()
         quit()
+
     def GameLoop(self):
         self.enemy = Enemy()
         self.combatLoop()
