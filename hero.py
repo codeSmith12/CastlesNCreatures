@@ -1,11 +1,11 @@
-
-
+from random import randint, choice
+from math import ceil
 
 class Hero: # Generic class Hero will describe a person of greater power.
     def __init__(self):
         self.name="Default"
         self.health = 50
-        self.magica = 100 # Even needed?
+        self.magica = 100
         self.maxHealth = 50
         self.maxMagica = 100
         self.attackDamage = 10
@@ -46,12 +46,14 @@ class Warrior(Hero):
         self.maxMagica = 50
         self.maxHealth = 150
         self.attackDamageRange = 5
+        self.damageBuffAmount = 0
+        self.damageBuffRange = 0
 
     def attackAbility(self,enemy):
         print(f"{self.name} stabs {enemy.name}.")
         hitChance = randint(self.dexterity, 100)
         if hitChance >= enemy.dexterity:
-            damage = randint(self.attackDamage, self.attackDamage + self.attackDamageRange) - enemy.armor
+            damage = randint(self.attackDamage + self.damageBuffAmount, self.attackDamage + self.damageBuffRange + self.attackDamageRange) - enemy.armor
             if damage <=0:
                 print(f"{enemy.name} blocked the attack.")
             else:
@@ -71,8 +73,8 @@ class Warrior(Hero):
     def buffAbility(self):
         print(f"{self.name} beats on their chest in a rhythm while shouting vigorously.")
         self.magica -= 25
-        self.attackDamage += 2
-        self.attackDamageRange += 3
+        self.damageBuffAmount = 2
+        self.attackDamageRange = 3
         print(f"{self.name}\'s attack damage increased to {self.attackDamage}.")
         print(f"Magica: {self.magica}")
 
@@ -90,7 +92,6 @@ class Warrior(Hero):
         ''')
         attack = input("\tEnter choice for attack here: ")
         return attack
-
 
 
 '''
@@ -160,20 +161,35 @@ class Rogue(Hero):
         self.magica = 125 # Energy instead for Rogue?? regain after every basic attack
         self.attackDamageRange = 8
 
+    def attackAbility(self, enemy):
+        pass
+
+    def displayAttacks(self):
+        print('''
+
+            1) Fireball
+            2) Ice Wall
+            3) Unlimited Power
+            4) Use Item
+
+        ''')
+        attack = input("\tEnter choice for attack here: ")
+        return attack
+
 class Enemy:
     def __init__(self):
         self.name = "Goblin"
         self.health = 24
-        self.attackDamage = 9
+        self.attackDamage = 12
         self.attackDamageRange = 3
         self.spellDamage = 4
-        self.dexterity = 54
+        self.dexterity = 55
         self.attackType = "slashes at"
         self.armor = 0
 
     def attack(self, hero):
         print(f"{self.name} {self.attackType} {hero.name}.")
-        hitChance = randint(self.dexterity, 99)
+        hitChance = randint(self.dexterity, 100)
 
         if  hasattr(hero, "shieldActivated") and hero.shieldActivated == True:
              print(f"{self.name}\'s attack was absorbed by {hero.name}\'s ice shield.")
