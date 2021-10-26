@@ -3,8 +3,6 @@
 from time import sleep
 import os
 from math import ceil
-import pygame
-import prettyBtns as pb
 import hero
 
 '''
@@ -21,34 +19,15 @@ Could ROLL on stats at characterCreation, health = randint(45-55)
                                           dexterity = randint(55-65)
                 Rolls have different ranges depending on class chosen!!!
 
-Champion types:
-Warrior:
-    Main Stat:
-            Strength? are we doing typical shit ? I mean kids need stability
-            Medium attack speed, moderate damage, high health pool, maybe shield
-            least gambling type, consistent dmg
 
 
-            Defensive ability: Raise Shield
+round system:
 
-Magi:
-    Main Stat:
-        Acuity
-        heavy slow attacks, expensive can crit hard , semi gambling type
-        more consistent than rogue
-        Defensive ability: Spell shield, or healing magic?
-
-Rogueish:
-    Main Stat:
-        Perception:
-            Fast attacking, disabler, Risk vs reward type of character, gambling type
-            Item dependent ? items will give chance on hit to stun, skip turn
-            does a consistent dmg, or crit dmg?
-
-        Defensive ability: Evade ?
-
-
-Choice of race in beginning? Could tweak a few stats
+3 random enemies,
+shop, big shop
+boss,
+shop,? limited shop
+repeat with + level difficulty
 
 '''
 
@@ -57,20 +36,6 @@ class GameMaster():
     def __init__(self):
         self.characterCreation()
 
-
-        # while not gameOver:
-        #     for event in pygame.event.get():
-        #         if event.type == pygame.QUIT:
-        #             gameOver = True
-        #         if event.type == pygame.MOUSEBUTTONDOWN:
-        #             if startBtn.collidepoint(pygame.mouse.get_pos()):
-        #                 print("Starting game...")
-        #     screen.blit(pygame.transform.scale(screen2, (WIDTH, HEIGHT)), (0, 0))
-        #     pygame.display.update()
-        #
-        # pygame.quit()
-        # quit()
-        #
     def characterCreation(self):
         print("""
 

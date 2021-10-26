@@ -1,6 +1,43 @@
 from random import randint, choice
 from math import ceil
+'''
+Ideas:
 
+Add bleeds / dots to the game? On crit, add a dot ???
+
+
+
+Champion types:
+Warrior:
+    Main Stat:
+            Strength? are we doing typical shit ? I mean kids need stability
+            Medium attack speed, moderate damage, high health pool, maybe shield
+            least gambling type, consistent dmg
+
+
+            Defensive ability: Raise Shield
+
+Magi:
+    Main Stat:
+        Acuity
+        heavy slow attacks, expensive can crit hard , semi gambling type
+        more consistent than rogue
+        Defensive ability: Spell shield, or healing magic?
+
+Rogueish:
+    Main Stat:
+        Perception:
+            Fast attacking, disabler, Risk vs reward type of character, gambling type
+            Item dependent ? items will give chance on hit to stun, skip turn
+            does a consistent dmg, or crit dmg?
+
+        Defensive ability: Evade ?
+
+
+Choice of race in beginning? Could tweak a few stats
+
+
+'''
 class Hero: # Generic class Hero will describe a person of greater power.
     def __init__(self):
         self.name="Default"
@@ -50,10 +87,19 @@ class Warrior(Hero):
         self.damageBuffRange = 0
 
     def attackAbility(self,enemy):
-        print(f"{self.name} stabs {enemy.name}.")
         hitChance = randint(self.dexterity, 100)
         if hitChance >= enemy.dexterity:
-            damage = randint(self.attackDamage + self.damageBuffAmount, self.attackDamage + self.damageBuffRange + self.attackDamageRange) - enemy.armor
+            rollCrit = randint(1,100)
+            if rollCrit > 25:
+                critDamage = 1.8
+                print(f"{self.name} critically stabs {enemy.name}.")
+            else:
+                critDamage = 1
+                print(f"{self.name} stabs {enemy.name}.")
+            # Calculate true damage
+            damage = randint(self.attackDamage + self.damageBuffAmount, self.attackDamage + self.damageBuffRange + self.attackDamageRange)
+            # Calculate final damage
+            damage = ceil(damage * critDamage - enemy.armor) #
             if damage <=0:
                 print(f"{enemy.name} blocked the attack.")
             else:
@@ -75,7 +121,7 @@ class Warrior(Hero):
         self.magica -= 25
         self.damageBuffAmount = 2
         self.attackDamageRange = 3
-        print(f"{self.name}\'s attack damage increased to {self.attackDamage}.")
+        print(f"{self.name}\'s attack damage increased to {self.attackDamage + self.damageBuffAmount}.")
         print(f"Magica: {self.magica}")
 
     def useItem(self):
@@ -114,12 +160,17 @@ class Magi(Hero):
 
     def attackAbility(self, enemy):
         print(self.shieldActivated)
+        rollCrit = randint(1,100)
+        if rollCrit > 95:
+            critDamage = 1.8
+        else:
+            critDamage = 1
         if not self.buffActivated:
-            damage = randint(self.spellDamage, self.spellDamage + self.attackDamageRange)
+            damage = randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage
             print(f"{self.name} launches a fireball at {enemy.name} and deals {damage} damage")
             enemy.health -= self.spellDamage
         else:
-            damage = randint(ceil(self.spellDamage*1.75), ceil(self.spellDamage*1.75) + self.attackDamageRange)
+            damage = randint(ceil(self.spellDamage*1.75), ceil(self.spellDamage*1.75) + self.attackDamageRange) * critDamage
             print(f"A massive fireball erupt from {self.name}, striking {enemy.name} for {damage} damage")
             enemy.health -= damage
             self.buffActivated = False
@@ -161,13 +212,17 @@ class Rogue(Hero):
         self.magica = 125 # Energy instead for Rogue?? regain after every basic attack
         self.attackDamageRange = 8
 
-    def attackAbility(self, enemy):
+    def attackAbility(self, enemy): #
+        pass
+    def defensiveAbility(self):
+        pass
+    def buffAbility(self):
         pass
 
     def displayAttacks(self):
         print('''
 
-            1) Fireball
+            1)
             2) Ice Wall
             3) Unlimited Power
             4) Use Item
@@ -179,7 +234,7 @@ class Rogue(Hero):
 class Enemy:
     def __init__(self):
         self.name = "Goblin"
-        self.health = 24
+        self.health = 25
         self.attackDamage = 12
         self.attackDamageRange = 3
         self.spellDamage = 4
