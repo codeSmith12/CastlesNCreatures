@@ -51,14 +51,14 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.luck=1 # can help them hit better, hit harder, crit chance perhaps.
         # Luck maybe stays at 1, but can go above 1 (like 1.1) and be multiplied by other stats in increase them.
         self.dexterity = 65 # Likelyhood of hitting. fun math to do here.
-        self.armor = 9
+        self.armor = 4
         self.equiptment = []
         self.items = []
 
     def attackAbility(self, enemy):
-        pass
+        print("Hello...")
     def defensiveAbility(self):
-        pass
+        print("Hello...")
     def buffAbility(self): # Offensive buffs >?
         pass
     def useItem(self):
@@ -82,15 +82,17 @@ class Warrior(Hero):
         self.magica = 50
         self.maxMagica = 50
         self.maxHealth = 150
+        self.health = self.maxHealth
         self.attackDamageRange = 5
         self.damageBuffAmount = 0
         self.damageBuffRange = 0
+        self.armor = 5
 
     def attackAbility(self,enemy):
         hitChance = randint(self.dexterity, 100)
         if hitChance >= enemy.dexterity:
             rollCrit = randint(1,100)
-            if rollCrit > 25:
+            if rollCrit > 75:
                 critDamage = 1.8
                 print(f"{self.name} critically stabs {enemy.name}.")
             else:
@@ -151,12 +153,15 @@ class Magi(Hero):
     def __init__(self):
         super().__init__()
         self.spellDamage = 12 # 21 - > 24?
-        self.magica = 150
         self.maxMagica = 150
+        self.maxHealth = 100
+        self.health = self.maxHealth
+        self.magica = self.maxMagica
         self.attackDamageRange = 3
         self.buffActivated = False
         self.shieldActivated = False
         self.dexterity = 50
+        self.armor = 2
 
     def attackAbility(self, enemy):
         print(self.shieldActivated)
@@ -205,26 +210,64 @@ class Magi(Hero):
         attack = input("\tEnter choice for attack here: ")
         return attack
 
-class Rogue(Hero):
+class Ranger(Hero):
     def __init__(self):
         super().__init__()
+        self.maxMagica = 75
+        self.maxHealth = 90
+        self.health = self.maxHealth
+        self.magica = self.maxMagica
         self.dexterity = 70
-        self.magica = 125 # Energy instead for Rogue?? regain after every basic attack
+        self.attackDamage = 8
         self.attackDamageRange = 8
+        self.evasionCharges = 0
+        self.damageBuffAmount = 0
+        self.damageBuffRange = 0
+        self.critChance = 25
+        self.armor = 3
 
     def attackAbility(self, enemy): #
-        pass
+        hitChance = randint(self.dexterity, 100)
+        if hitChance >= enemy.dexterity:
+            rollCrit = randint(self.critChance, 100)
+            if rollCrit > 75:
+                critDamage = 1.8
+                print(f"{self.name} critically hits {enemy.name}.")
+            else:
+                critDamage = 1
+                print(f"{self.name} hits {enemy.name}.")
+            # Calculate true damage
+            damage = randint(self.attackDamage + self.damageBuffAmount, self.attackDamage + self.damageBuffRange + self.attackDamageRange)
+            # Calculate final damage
+            damage = ceil(damage * critDamage - enemy.armor) #
+            if damage <=0:
+                print(f"{enemy.name} blocked the attack.")
+            else:
+                print(f"{self.name}'s arrow hits {enemy.name} for {damage}")
+                enemy.health -= damage
+                print(f"{enemy.name} is at {enemy.health} health")
+        else:
+            print(f"{self.name}\'s arrow misses by an inch.")
+
     def defensiveAbility(self):
-        pass
+        print(f"{self.name} throws a smoke screen onto the battle field.")
+        print(f"For 2 turns, enemy loses 20 dexterity while attacking.")
+        self.magica -= 25
+        self.evasionCharges += 2
+
+
     def buffAbility(self):
-        pass
+        print(f"{self.name} sharpens their arrows.")
+        self.critChance += 13
+        self.magica -= 25
+        print(f"{self.name}'s chance to crit has increased to {self.critChance}.")
 
     def displayAttacks(self):
         print('''
 
-            1)
-            2) Ice Wall
-            3) Unlimited Power
+            1) Shoot Arrow
+            2) Evasion
+            3) Piercing Arrows
             4) Use Item
 
         ''')
@@ -244,8 +287,14 @@ class Enemy:
 
     def attack(self, hero):
         print(f"{self.name} {self.attackType} {hero.name}.")
-        hitChance = randint(self.dexterity, 100)
+        if  hasattr(hero, "evasionCharges") and hero.evasionCharges>0:
+            hitChance = randint(self.dexterity-20, 80)
+            hero.evasionCharges -= 1
+            print(f"{hero.name} has {hero.evasionCharges} evasion charges left.")
+        else:
+            hitChance = randint(self.dexterity, 100)
 
+        # If hero is Warrior and has used Shield Buff, attack is absorbed by shield, buff is toggled off
         if  hasattr(hero, "shieldActivated") and hero.shieldActivated == True:
              print(f"{self.name}\'s attack was absorbed by {hero.name}\'s ice shield.")
              hero.shieldActivated = False

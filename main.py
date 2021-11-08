@@ -45,7 +45,7 @@ class GameMaster():
 
     1) Warrior
     2) Magi
-    3) Rogue
+    3) Ranger
 
         """)
         choice = ""
@@ -53,14 +53,14 @@ class GameMaster():
             choice = input("Enter choice for class here: ")
 
         if choice == "1":
-            print("\n\tThe warrior? A stable choice.")
+            print("\n\tThe warrior? A strong choice.")
             self.hero = hero.Warrior()
         elif choice == "2":
             print("\n\tThe Magi? A smart choice.")
             self.hero = hero.Magi()
         elif choice == "3":
-            print("\n\tThe Rogue, eh? I see you like to take your chances.")
-            self.hero = hero.Rogue()
+            print("\n\tThe Ranger, eh? Practicing social distancing I see..")
+            self.hero = hero.Ranger()
 
         name = ""
         while len(name) <= 0 or not name.isalpha():
@@ -75,18 +75,30 @@ class GameMaster():
         self.GameLoop()
     def promptHeroAttack(self):
         choice = ""
+        insufficientMana = False
         while choice != "1" and choice != "2" and choice != "3":
             choice = self.hero.displayAttacks()
 
-        if choice == "1":
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.hero.attackAbility(self.enemy)
-        elif choice == "2":
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.hero.defensiveAbility()
-        elif choice == "3":
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.hero.buffAbility()
+            if choice == "1":
+                os.system('cls' if os.name == 'nt' else 'clear')
+                self.hero.attackAbility(self.enemy)
+                return
+            elif choice == "2":
+                if self.hero.magica < 25:
+                    print("Insufficient mana. Choose another attack.")
+                    choice = ""
+                else:
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    self.hero.defensiveAbility()
+                    return
+            elif choice == "3":
+                if self.hero.magica < 25:
+                    print("Insufficient mana. Choose another attack.")
+                    choice = ""
+                else:
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    self.hero.buffAbility()
+                    return
 
     def lootProcess(self):
         print("You find a {}")
