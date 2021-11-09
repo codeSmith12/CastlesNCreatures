@@ -4,7 +4,8 @@ from time import sleep
 import os
 from math import ceil
 import hero
-
+from random import randint, choice
+from item import Item
 '''
 Dynamics:
 Begin game by choosing a class. Shows inheritence...
@@ -34,7 +35,19 @@ repeat with + level difficulty
 
 class GameMaster():
     def __init__(self):
+        self.createLootTable()
         self.characterCreation()
+
+    def createLootTable(self):
+        self.weaponLootTable = [
+            # Item name: (drop chance/100, "description", "stat", buffAmount )
+            Item("Fire Sword", 25, "A legendary sword engulfed in flames. Adds 5 to attack damage.", "attackDamage", 5),
+            Item("Ice Staff", 25, "A legendary staff made of enchanted ice. Adds 5 to spell damage.", "spellDamage", 5)
+        ]
+        self.consumableLootTable = [
+            Item("Health Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "health", 50),
+            Item("Mana Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "magica", 50),
+        ]
 
     def characterCreation(self):
         print("""
@@ -70,13 +83,14 @@ class GameMaster():
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"\n\tGreetings {name}. Good luck on your travels...")
 
-        sleep(4)
+        sleep(2)
         os.system('cls' if os.name == 'nt' else 'clear')
         self.GameLoop()
+
     def promptHeroAttack(self):
         choice = ""
         insufficientMana = False
-        while choice != "1" and choice != "2" and choice != "3":
+        while choice != "1" and choice != "2" and choice != "3" and choice != "4":
             choice = self.hero.displayAttacks()
 
             if choice == "1":
@@ -99,9 +113,47 @@ class GameMaster():
                     os.system('cls' if os.name == 'nt' else 'clear')
                     self.hero.buffAbility()
                     return
+            elif choice == "4":
+                    # os.system('cls' if os.name == 'nt' else 'clear')
+                    self.useChosenItem()
+                    return
+
+    def useChosenItem(self):
+        item = self.hero.useItem()
+        if not item:
+            print("No item was chosen. Back to the fight!")
+        else:
+            stat = getattr(self.hero, item.stat) # Grab the stat the item is increasing
+            if item.stat == "health":
+                self.hero.health += item.amount# Increase the stat by that amount.
+                print(f"{self.hero.name} is now at {self.hero.health} health.")
+            elif item.stat == "magica":
+                self.hero.magica += item.amount# Increase the stat by that amount.
+                print(f"{self.hero.name} is now at {self.hero.magica} magica.")
+        sleep(2)
+
 
     def lootProcess(self):
-        print("You find a {}")
+        # Drop random gold.
+        gold = randint(3, 25)
+        print(f"You gather {gold} gold.")
+
+        # Roll weapon item slot, system needs work
+        weaponItem = choice(self.weaponLootTable)
+        itemRoll = randint(weaponItem.dropChance, 100)
+        if itemRoll > 100 - weaponItem.dropChance/2: # added /2 for fun.. IDK
+
+            print(f"{self.hero.name} receives weapon: {weaponItem.name}")
+            self.hero.equiptment.append(weaponItem)
+
+        useableItem = choice(self.consumableLootTable)
+        itemRoll = randint(useableItem.dropChance, 100)
+        if itemRoll > 100 - useableItem.dropChance/2:
+            print(f"{self.hero.name} receives consumable: {useableItem.name}")
+            self.hero.items.append(useableItem)
+
+
+
 
     def combatLoop(self):
         heroStats = self.hero # Must save hero stats at beginning of fight
@@ -117,10 +169,13 @@ class GameMaster():
         self.hero = heroStats # Set the hero stats back to normal after fight.
 
     def GameLoop(self):
-        self.enemy = hero.Enemy()
-        print(f"\n\tA {self.enemy.name} appears!")
-        self.combatLoop()
-        self.lootProcess()
+        for i in range(4):
+            self.enemy = hero.Enemy()
+            print(f"\n\tA {self.enemy.name} appears!")
+            self.combatLoop()
+            self.lootProcess()
+            del self.enemy
+
 
 
 

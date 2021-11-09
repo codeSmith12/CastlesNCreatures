@@ -56,13 +56,23 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.items = []
 
     def attackAbility(self, enemy):
-        print("Hello...")
+        pass
     def defensiveAbility(self):
-        print("Hello...")
+        pass
     def buffAbility(self): # Offensive buffs >?
         pass
     def useItem(self):
-        pass
+        while True:
+            for i in range(len(self.items)):
+                print(f"{i+1}: {self.items[i].name}")
+            choice = input("Enter the number of the item you'd like to use. Press enter for no item.")
+            if choice == "":
+                return
+            elif int(choice) < 1 or int(choice)> len(self.items):
+                print(f"Please enter number from 1 to {len(self.items)}")
+            else:
+                return self.items[int(choice)-1]
+
     def displayAttacks(self):
         pass
 
@@ -164,7 +174,6 @@ class Magi(Hero):
         self.armor = 2
 
     def attackAbility(self, enemy):
-        print(self.shieldActivated)
         rollCrit = randint(1,100)
         if rollCrit > 95:
             critDamage = 1.8
