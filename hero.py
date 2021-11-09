@@ -71,6 +71,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
             elif int(choice) < 1 or int(choice)> len(self.items):
                 print(f"Please enter number from 1 to {len(self.items)}")
             else:
+                # self.items.remove(self.items[int(choice)-1])
                 return self.items[int(choice)-1]
 
     def displayAttacks(self):
@@ -195,13 +196,11 @@ class Magi(Hero):
     def defensiveAbility(self):
         self.magica -= 25
         print(f"{self.name} builds an icy barrier before them.")
-        print(f"Magica: {self.magica}")
         self.shieldActivated = True
 
     def buffAbility(self):
         self.magica -= 25
         print(f"Energy begins to swirl around {self.name}.")
-        print(f"Magica: {self.magica}")
         self.buffActivated = True
 
     def useItem(self):

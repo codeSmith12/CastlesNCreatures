@@ -104,6 +104,7 @@ class GameMaster():
                 else:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     self.hero.defensiveAbility()
+                    print(f"{self.hero.name}'s magica is now at {self.hero.magica}")
                     return
             elif choice == "3":
                 if self.hero.magica < 25:
@@ -112,18 +113,21 @@ class GameMaster():
                 else:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     self.hero.buffAbility()
+                    print(f"{self.hero.name}'s magica is now at {self.hero.magica}")
                     return
             elif choice == "4":
                     # os.system('cls' if os.name == 'nt' else 'clear')
                     self.useChosenItem()
                     return
 
+    # TODO: Move this function into the hero class
     def useChosenItem(self):
         item = self.hero.useItem()
         if not item:
             print("No item was chosen. Back to the fight!")
         else:
             stat = getattr(self.hero, item.stat) # Grab the stat the item is increasing
+            self.hero.items.remove(item)
             if item.stat == "health":
                 self.hero.health += item.amount# Increase the stat by that amount.
                 print(f"{self.hero.name} is now at {self.hero.health} health.")
