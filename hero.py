@@ -73,7 +73,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
         # While input isn't "", list each item
         while True:
             for i in range(len(self.equiptment)):
-                print(f"{i+1}: {self.equiptment[i].name}")
+                print(f"{i+1}: {self.equiptment[i].name} - {self.equiptment[i].description}\n")
             choice = input("Enter the number of the item you'd like to equipt. Press enter for no item.\n")
             if choice == "":
                 return
@@ -97,9 +97,9 @@ class Hero: # Generic class Hero will describe a person of greater power.
                         print(f"{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.spellDamage}")
                     elif self.__class__.__name__ == "Ranger":
                         self.attackDamage -= self.curWeapon.amount
-
                         self.attackDamage += self.equiptment[choice].amount
                         print(f"{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.attackDamage}")
+                    # Place weapon in weapon slot
                     self.curWeapon = self.equiptment[choice]
                 else: # Print message if they chose an item that isn't part of their class
                     print(f"This weapon is meant for a {self.equiptment[choice].stat}.")
@@ -110,7 +110,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
     def useItem(self): # Should combine with other item function
         while True:
             for i in range(len(self.items)):
-                print(f"{i+1}: {self.items[i].name}")
+                print(f"{i+1}: {self.items[i].name} - {self.items[i].description}\n")
             choice = input("Enter the number of the item you'd like to use. Press enter for no item.")
             if choice == "":
                 return
@@ -354,7 +354,10 @@ class Ranger(Hero):
         print(f"{self.name} sharpens their arrows.")
         self.critChance += 13
         self.magica -= 25
+        if self.critChance > 100:
+            self.critChance = 99
         print(f"{self.name}'s chance to crit has increased to {self.critChance}.")
+
 
     def displayAttacks(self):
         print('''
@@ -369,15 +372,15 @@ class Ranger(Hero):
         return attack
 
 class Enemy:
-    def __init__(self):
-        self.name = "Goblin"
-        self.health = randint(20,30)
-        self.attackDamage = randint(12,14)
-        self.attackDamageRange = 3
-        self.spellDamage = 4
-        self.dexterity = randint(55,60)
-        self.attackType = "slashes at"
-        self.armor = 0
+    def __init__(self, name, health, attack, range, spellDmg, dex, attackType, arm):
+        self.name = name
+        self.health = health
+        self.attackDamage = attack
+        self.attackDamageRange = range
+        self.spellDamage = spellDmg
+        self.dexterity = dex
+        self.attackType = attackType
+        self.armor = arm
 
     def attack(self, hero):
         print(f"{self.name} {self.attackType} {hero.name}.")
@@ -394,7 +397,7 @@ class Enemy:
              hero.shieldActivated = False
         elif hitChance >= hero.dexterity:
             damage = randint(self.attackDamage, self.attackDamage + self.attackDamageRange) - hero.armor
-            if damage <=-1:
+            if damage <=0:
                 print(f"\n{hero.name} blocked the attack.")
             else:
                 print(f"\n{self.name} strikes {hero.name} for {damage}")

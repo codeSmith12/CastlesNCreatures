@@ -1,5 +1,6 @@
 # JUST SLIGHTLY INTO THE PYGAME STUFF
 # from random import randint, choice
+from copy import copy, deepcopy
 from time import sleep
 import os
 from math import ceil
@@ -41,18 +42,25 @@ class GameMaster():
     def createLootTable(self):
         self.weaponLootTable = [
             # Item name: (drop chance/100, "description", "stat", buffAmount )
-            Item("Fire Sword", 25, "A legendary sword engulfed in flames. Adds 5 to attack damage.", "Warrior", 5),
-            Item("Ice Staff", 25, "A legendary staff made of enchanted ice. Adds 5 to spell damage.", "Magi", 5),
-            Item("Lightning Bow", 25, "A legendary bow that enchants each arrow it shoots with lightning. Adds 5 to attack damage.", "Ranger", 5)
+            Item("Fire Sword", 35, "A magic sword engulfed in flames. Adds 5 to attack damage.", "Warrior", 5),
+            Item("Chaos Sword", 20, "An epic sword that ensues chaos around the weilder. Adds 12 to attack damage.", "Warrior", 12),
+            Item("Master Sword", 10, "A legendary sword that only a combat master can weild. Adds 20 to attack damage.", "Warrior", 20),
+            Item("Ice Staff", 35, "A magic staff made of enchanted ice. Adds 5 to spell damage.", "Magi", 5),
+            Item("Vortex Staff", 20, "An epic staff made of swirling energy. Adds 12 to spell damage.", "Magi", 12),
+            Item("Master Staff", 10, "A legendary staff crafted by the gods. Adds 20 to spell damage.", "Magi", 20),
+            Item("Lightning Bow", 35, "A magic bow that enchants each arrow it shoots with lightning. Adds 5 to attack damage.", "Ranger", 5),
+            Item("Holy Bow", 20, "An epic bow that shoots bolts of holy light. Adds 12 to attack damage.", "Ranger", 12),
+            Item("Master Bow", 10, "A legendary bow that was crafted by the gods. Adds 20 to attack damage.", "Ranger", 20),
         ]
+
         self.consumableLootTable = [
-            Item("Health Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "health", 50),
-            Item("Mana Potion", 75, "A potion that can be used in battle to restore mana points. Obviously.", "magica", 50),
-            Item("Evasion Talisman", 25, "Permanently increases Dexterity", "dexterity", 10),
-            Item("Armor Talisman", 25, "Permanently increases armor.", "armor", 4),
-            Item("Max Health Talisman", 25, "Permanently increases Max Health", "maxHealth", 15),
-            Item("Max Mana Talisman", 25, "Permanently increases Max Mana", "maxMagica", 25),
-            Item("Lucky Talisman", 10, "Permanently increases critical strike chance", "critChance", 15),
+            Item("Health Potion", 75, "A potion that can be used in battle to restore 50 health points. Obviously.", "health", 50),
+            Item("Mana Potion", 75, "A potion that can be used in battle to restore 50 mana points. Obviously.", "magica", 50),
+            Item("Evasion Talisman", 25, "Permanently increases Dexterity by 10.", "dexterity", 10),
+            Item("Armor Talisman", 25, "Permanently increases armor by 4.", "armor", 4),
+            Item("Max Health Talisman", 25, "Permanently increases Max Health by 15.", "maxHealth", 15),
+            Item("Max Mana Talisman", 25, "Permanently increases Max Mana by 15.", "maxMagica", 25),
+            Item("Lucky Talisman", 10, "Permanently increases critical strike chance by 10.", "critChance", 15),
         ]
 
     def characterCreation(self):
@@ -126,31 +134,31 @@ class GameMaster():
                     self.hero.useChosenItem()
                     return
 
-
-
-
     def lootProcess(self):
         # Drop random gold.
         gold = randint(3, 25)
         self.hero.gold += gold
         print(f"{self.hero.name} gathers {gold} gold. They now have {self.hero.gold} gold.")
 
-        # Roll weapon item slot, system needs work
+        # Choose item from loot table, check to see if they won the item
         weaponItem = choice(self.weaponLootTable)
-        itemRoll = randint(weaponItem.dropChance, 100)
-        if itemRoll > 100 - weaponItem.dropChance/2: # added /2 for fun.. IDK
-
+        itemRoll = randint(0, 100)
+        if itemRoll > 100 - weaponItem.dropChance:
             print(f"{self.hero.name} receives weapon: {weaponItem.name}")
             self.hero.equiptment.append(weaponItem)
+        else: # Rolls a second time if the first roll fails..
+            weaponItem = choice(self.weaponLootTable)
+            itemRoll = randint(0, 100)
+            if itemRoll > 100 - weaponItem.dropChance: # added /2 for fun.. IDK
+                print(f"{self.hero.name} receives weapon: {weaponItem.name}")
+                self.hero.equiptment.append(weaponItem)
 
+        # Choose item from loot table, check to see if they won the item
         useableItem = choice(self.consumableLootTable)
-        itemRoll = randint(useableItem.dropChance, 100)
-        if itemRoll > 100 - useableItem.dropChance/2:
+        itemRoll = randint(0, 100)
+        if itemRoll > 100 - useableItem.dropChance:
             print(f"{self.hero.name} receives consumable: {useableItem.name}")
             self.hero.items.append(useableItem)
-
-
-
 
     def combatLoop(self):
         heroStats = self.hero # Must save hero stats at beginning of fight
@@ -176,9 +184,15 @@ class GameMaster():
                 self.hero.useChosenItem()
 
     def GameLoop(self):
-        # for i in range(10):
+        self.enemyList = [
+                    #  name    ,   health   ,    attackDamage,     range     , spellDmg,  dex,    attack type,   armor
+            hero.Enemy("Goblin", randint(25,30), randint(12,14), randint(2,4), 0, randint(50,60), "slashes at", randint(0,2)),
+            hero.Enemy("Goblin Archer", randint(15,22), randint(10,11), randint(6,8), 0, randint(45,55), "shoots at", randint(0,1)),
+            hero.Enemy("Wyvern", randint(55,65), randint(13,17), randint(3,5), 0, randint(35,60), "breathes fire at", randint(6,7)),
+            hero.Enemy("Skeleton Warrior", randint(35,40), randint(15,15), randint(3,4), 0, randint(50,60), "stabs", randint(2,4)),
+        ]
         while self.hero.health > 0:
-            self.enemy = hero.Enemy()
+            self.enemy = deepcopy(choice(self.enemyList))
             print(f"\n\tA {self.enemy.name} appears!")
             self.combatLoop()
             self.lootProcess()
