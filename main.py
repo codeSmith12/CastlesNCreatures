@@ -41,15 +41,18 @@ class GameMaster():
     def createLootTable(self):
         self.weaponLootTable = [
             # Item name: (drop chance/100, "description", "stat", buffAmount )
-            Item("Fire Sword", 25, "A legendary sword engulfed in flames. Adds 5 to attack damage.", "attackDamage", 5),
-            Item("Ice Staff", 25, "A legendary staff made of enchanted ice. Adds 5 to spell damage.", "spellDamage", 5)
+            Item("Fire Sword", 25, "A legendary sword engulfed in flames. Adds 5 to attack damage.", "Warrior", 5),
+            Item("Ice Staff", 25, "A legendary staff made of enchanted ice. Adds 5 to spell damage.", "Magi", 5),
+            Item("Lightning Bow", 25, "A legendary bow that enchants each arrow it shoots with lightning. Adds 5 to attack damage.", "Ranger", 5)
         ]
         self.consumableLootTable = [
             Item("Health Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "health", 50),
             Item("Mana Potion", 75, "A potion that can be used in battle to restore mana points. Obviously.", "magica", 50),
             Item("Evasion Talisman", 25, "Permanently increases Dexterity", "dexterity", 10),
+            Item("Armor Talisman", 25, "Permanently increases armor.", "armor", 4),
             Item("Max Health Talisman", 25, "Permanently increases Max Health", "maxHealth", 15),
             Item("Max Mana Talisman", 25, "Permanently increases Max Mana", "maxMagica", 25),
+            Item("Lucky Talisman", 10, "Permanently increases critical strike chance", "critChance", 15),
         ]
 
     def characterCreation(self):
@@ -120,43 +123,17 @@ class GameMaster():
                     return
             elif choice == "4":
                     # os.system('cls' if os.name == 'nt' else 'clear')
-                    self.useChosenItem()
+                    self.hero.useChosenItem()
                     return
 
-    # TODO: Move this function into the hero class
-    def useChosenItem(self):
-        item = self.hero.useItem()
-        if not item:
-            print("No item was chosen. Back to the fight!")
-        else:
-            stat = getattr(self.hero, item.stat) # Grab the stat the item is increasing
-            if item.stat == "health":
-                self.hero.health += item.amount# Increase the stat by that amount.
-                if self.hero.health > self.hero.maxHealth:
-                    self.hero.health = self.hero.maxHealth
-                elif self.hero.health == self.hero.maxHealth:
-                    print(f"{self.hero.name} is already at full health.")
-                    return
-                print(f"{self.hero.name} is now at {self.hero.health} health.")
-                self.hero.items.remove(item)
-            elif item.stat == "magica":
-                self.hero.magica += item.amount# Increase the stat by that amount.
-                if self.hero.magica > self.hero.maxMagica:
-                    self.hero.magica = self.hero.maxMagica
-                elif self.hero.magica == self.hero.maxMagica:
-                    print(f"{self.hero.name} is already at full magica.")
-                    return
-                self.hero.items.remove(item)
-                print(f"{self.hero.name} is now at {self.hero.magica} magica.")
 
-        sleep(2)
 
 
     def lootProcess(self):
         # Drop random gold.
         gold = randint(3, 25)
-        print(f"You gather {gold} gold.")
         self.hero.gold += gold
+        print(f"{self.hero.name} gathers {gold} gold. They now have {self.hero.gold} gold.")
 
         # Roll weapon item slot, system needs work
         weaponItem = choice(self.weaponLootTable)
@@ -188,13 +165,28 @@ class GameMaster():
         print("\n\tExiting combat\n")
         self.hero = heroStats # Set the hero stats back to normal after fight.
 
+    def outOfCombatMenu(self):
+        while True:
+            choice = input("\n1) Continue\n2) Change equiptment\n3) Use item \n")
+            if choice == "" or choice == "1":
+                return
+            elif choice == "2":
+                self.hero.changeEquiptment()
+            elif choice == "3":
+                self.hero.useChosenItem()
+
     def GameLoop(self):
-        for i in range(10):
+        # for i in range(10):
+        while self.hero.health > 0:
             self.enemy = hero.Enemy()
             print(f"\n\tA {self.enemy.name} appears!")
             self.combatLoop()
             self.lootProcess()
             del self.enemy
+            if self.hero.health > 0:
+                self.outOfCombatMenu()
+            # Allow user to use items between combat, after looting...
+            # Allow user to change equiptment outside of combat..
 
 
 

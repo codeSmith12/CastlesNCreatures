@@ -1,5 +1,7 @@
 from random import randint, choice
 from math import ceil
+from time import sleep
+from item import Item
 '''
 Ideas:
 
@@ -56,6 +58,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.items = []
         self.gold = 0
         self.critChance = 25
+        self.curWeapon = Item("Basic weapon", 0, "Basic weapon", "Hero", 0)
 
     def attackAbility(self, enemy):
         pass
@@ -63,7 +66,48 @@ class Hero: # Generic class Hero will describe a person of greater power.
         pass
     def buffAbility(self): # Offensive buffs >?
         pass
-    def useItem(self):
+
+
+    # Function that allows us to change weapons, called outside of combat
+    def changeEquiptment(self):
+        # While input isn't "", list each item
+        while True:
+            for i in range(len(self.equiptment)):
+                print(f"{i+1}: {self.equiptment[i].name}")
+            choice = input("Enter the number of the item you'd like to equipt. Press enter for no item.\n")
+            if choice == "":
+                return
+                # Error check the numbers to avoid out of indexing
+            elif int(choice) < 1 or int(choice)> len(self.equiptment):
+                print(f"Please enter number from 1 to {len(self.equiptment)}")
+            else:
+                # Convert choice to the true choice
+                choice = int(choice) - 1
+                # Check if the equiptment item they chose is usable by their class
+                if self.__class__.__name__ == self.equiptment[choice].stat:
+                    # Increase the correct stat depending on the class,
+                    # reduce damage from the unequipt weapon
+                    if self.__class__.__name__ == "Warrior":
+                        self.attackDamage -= self.curWeapon.amount
+                        self.attackDamage += self.equiptment[choice].amount
+                        print(f"{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.attackDamage}")
+                    elif self.__class__.__name__ == "Magi":
+                        self.spellDamage -= self.curWeapon.amount
+                        self.spellDamage += self.equiptment[choice].amount
+                        print(f"{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.spellDamage}")
+                    elif self.__class__.__name__ == "Ranger":
+                        self.attackDamage -= self.curWeapon.amount
+
+                        self.attackDamage += self.equiptment[choice].amount
+                        print(f"{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.attackDamage}")
+                    self.curWeapon = self.equiptment[choice]
+                else: # Print message if they chose an item that isn't part of their class
+                    print(f"This weapon is meant for a {self.equiptment[choice].stat}.")
+
+    def displayAttacks(self):
+        pass
+
+    def useItem(self): # Should combine with other item function
         while True:
             for i in range(len(self.items)):
                 print(f"{i+1}: {self.items[i].name}")
@@ -73,12 +117,57 @@ class Hero: # Generic class Hero will describe a person of greater power.
             elif int(choice) < 1 or int(choice)> len(self.items):
                 print(f"Please enter number from 1 to {len(self.items)}")
             else:
-                # self.items.remove(self.items[int(choice)-1])
                 return self.items[int(choice)-1]
 
-    def displayAttacks(self):
-        pass
+    def useChosenItem(self):
+        item = self.useItem()
+        if not item:
+            print("No item was chosen. Back to the fight!")
+            return
+        else:
+            stat = getattr(self, item.stat) # Grab the stat the item is increasing
+            if item.stat == "health":
+                self.health += item.amount# Increase the stat by that amount.
+                if self.health > self.maxHealth:
+                    self.health = self.maxHealth
+                elif self.health == self.maxHealth:
+                    print(f"{self.name} is already at full health.")
+                    return
+                print(f"{self.name} is now at {self.health} health.")
+            elif item.stat == "magica":
+                self.magica += item.amount# Increase the stat by that amount.
+                if self.magica > self.maxMagica:
+                    self.magica = self.maxMagica
+                elif self.magica == self.maxMagica:
+                    print(f"{self.name} is already at full magica.")
+                    return
+                print(f"{self.name} is now at {self.magica} magica.")
+            elif item.stat == "dexterity":
+                self.dexterity += item.amount
+                if self.dexterity > 100:
+                    self.dexterity = 99
+                print(f"{self.name} quickens their pace. Their dexterity is now {self.dexterity}.")
+            elif item.stat == "maxHealth":
+                self.maxHealth += item.amount
+                self.health += item.amount
+                print(f"{self.name}'s vitality increases. Their health is now {self.health} out of {self.maxHealth}.")
+            elif item.stat == "maxMagica":
+                self.maxMagica += item.amount
+                self.magica += item.amount
+                print(f"{self.name}'s magical prowess increases. Their magica is now {self.magica} out of {self.maxMagica}.")
+            elif item.stat == "critChance":
+                self.critChance += item.amount
+                if self.critChance > 100:
+                    self.critChance = 99
+                print(f"{self.name}'s keen eye sharpens. Their chance to critical strike is now {self.critChance}.")
+            elif item.stat == "armor":
+                self.armor += item.amount
+                if self.armor > 100:
+                    self.armor = 99
+                print(f"{self.name}'s skin thickens. Their armor is now {self.armor}.")
 
+        self.items.remove(item)
+        sleep(2)
 
 '''
 Warrior class:
@@ -139,8 +228,6 @@ class Warrior(Hero):
         print(f"{self.name}\'s attack damage increased to {self.attackDamage + self.damageBuffAmount}.")
         print(f"Magica: {self.magica}")
 
-    def useItem(self):
-        pass
 
     def displayAttacks(self):
         print('''
@@ -186,7 +273,7 @@ class Magi(Hero):
         if not self.buffActivated:
             damage = ceil(randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage)
             print(f"{self.name} launches a fireball at {enemy.name} and deals {damage} damage")
-            enemy.health -= self.spellDamage
+            enemy.health -= damage
         else:
             damage = randint(ceil(self.spellDamage*1.75), ceil(self.spellDamage*1.75) + self.attackDamageRange) * critDamage
             print(f"A massive fireball erupt from {self.name}, striking {enemy.name} for {damage} damage")
@@ -284,11 +371,11 @@ class Ranger(Hero):
 class Enemy:
     def __init__(self):
         self.name = "Goblin"
-        self.health = 25
-        self.attackDamage = 12
+        self.health = randint(20,30)
+        self.attackDamage = randint(12,14)
         self.attackDamageRange = 3
         self.spellDamage = 4
-        self.dexterity = 55
+        self.dexterity = randint(55,60)
         self.attackType = "slashes at"
         self.armor = 0
 
