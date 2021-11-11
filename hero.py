@@ -54,6 +54,8 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.armor = 4
         self.equiptment = []
         self.items = []
+        self.gold = 0
+        self.critChance = 25
 
     def attackAbility(self, enemy):
         pass
@@ -102,8 +104,8 @@ class Warrior(Hero):
     def attackAbility(self,enemy):
         hitChance = randint(self.dexterity, 100)
         if hitChance >= enemy.dexterity:
-            rollCrit = randint(1,100)
-            if rollCrit > 75:
+            rollCrit = randint(0,100)
+            if rollCrit > 100 - self.critChance:
                 critDamage = 1.8
                 print(f"{self.name} critically stabs {enemy.name}.")
             else:
@@ -163,7 +165,7 @@ Notes:
 class Magi(Hero):
     def __init__(self):
         super().__init__()
-        self.spellDamage = 12 # 21 - > 24?
+        self.spellDamage = 14 # 21 - > 24?
         self.maxMagica = 150
         self.maxHealth = 100
         self.health = self.maxHealth
@@ -173,15 +175,16 @@ class Magi(Hero):
         self.shieldActivated = False
         self.dexterity = 50
         self.armor = 2
-
+        self.critChance = 20
     def attackAbility(self, enemy):
-        rollCrit = randint(1,100)
-        if rollCrit > 95:
+        rollCrit = randint(0,100)
+        if rollCrit > 100 - self.critChance:
             critDamage = 1.8
+            print(f"{self.name} critically strikes {enemy.name}")
         else:
             critDamage = 1
         if not self.buffActivated:
-            damage = randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage
+            damage = ceil(randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage)
             print(f"{self.name} launches a fireball at {enemy.name} and deals {damage} damage")
             enemy.health -= self.spellDamage
         else:
@@ -202,9 +205,6 @@ class Magi(Hero):
         self.magica -= 25
         print(f"Energy begins to swirl around {self.name}.")
         self.buffActivated = True
-
-    def useItem(self):
-        pass
 
     def displayAttacks(self):
         print('''
@@ -231,14 +231,13 @@ class Ranger(Hero):
         self.evasionCharges = 0
         self.damageBuffAmount = 0
         self.damageBuffRange = 0
-        self.critChance = 25
         self.armor = 3
 
     def attackAbility(self, enemy): #
         hitChance = randint(self.dexterity, 100)
         if hitChance >= enemy.dexterity:
-            rollCrit = randint(self.critChance, 100)
-            if rollCrit > 75:
+            rollCrit = randint(0, 100)
+            if rollCrit > 100 - self.critChance:
                 critDamage = 1.8
                 print(f"{self.name} critically hits {enemy.name}.")
             else:

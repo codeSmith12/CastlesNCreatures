@@ -46,7 +46,10 @@ class GameMaster():
         ]
         self.consumableLootTable = [
             Item("Health Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "health", 50),
-            Item("Mana Potion", 75, "A potion that can be used in battle to restore health points. Obviously.", "magica", 50),
+            Item("Mana Potion", 75, "A potion that can be used in battle to restore mana points. Obviously.", "magica", 50),
+            Item("Evasion Talisman", 25, "Permanently increases Dexterity", "dexterity", 10),
+            Item("Max Health Talisman", 25, "Permanently increases Max Health", "maxHealth", 15),
+            Item("Max Mana Talisman", 25, "Permanently increases Max Mana", "maxMagica", 25),
         ]
 
     def characterCreation(self):
@@ -99,7 +102,7 @@ class GameMaster():
                 return
             elif choice == "2":
                 if self.hero.magica < 25:
-                    print("Insufficient mana. Choose another attack.")
+                    print("Insufficient magica. Choose another attack.")
                     choice = ""
                 else:
                     os.system('cls' if os.name == 'nt' else 'clear')
@@ -108,7 +111,7 @@ class GameMaster():
                     return
             elif choice == "3":
                 if self.hero.magica < 25:
-                    print("Insufficient mana. Choose another attack.")
+                    print("Insufficient magica. Choose another attack.")
                     choice = ""
                 else:
                     os.system('cls' if os.name == 'nt' else 'clear')
@@ -127,13 +130,25 @@ class GameMaster():
             print("No item was chosen. Back to the fight!")
         else:
             stat = getattr(self.hero, item.stat) # Grab the stat the item is increasing
-            self.hero.items.remove(item)
             if item.stat == "health":
                 self.hero.health += item.amount# Increase the stat by that amount.
+                if self.hero.health > self.hero.maxHealth:
+                    self.hero.health = self.hero.maxHealth
+                elif self.hero.health == self.hero.maxHealth:
+                    print(f"{self.hero.name} is already at full health.")
+                    return
                 print(f"{self.hero.name} is now at {self.hero.health} health.")
+                self.hero.items.remove(item)
             elif item.stat == "magica":
                 self.hero.magica += item.amount# Increase the stat by that amount.
+                if self.hero.magica > self.hero.maxMagica:
+                    self.hero.magica = self.hero.maxMagica
+                elif self.hero.magica == self.hero.maxMagica:
+                    print(f"{self.hero.name} is already at full magica.")
+                    return
+                self.hero.items.remove(item)
                 print(f"{self.hero.name} is now at {self.hero.magica} magica.")
+
         sleep(2)
 
 
@@ -141,6 +156,7 @@ class GameMaster():
         # Drop random gold.
         gold = randint(3, 25)
         print(f"You gather {gold} gold.")
+        self.hero.gold += gold
 
         # Roll weapon item slot, system needs work
         weaponItem = choice(self.weaponLootTable)
@@ -173,7 +189,7 @@ class GameMaster():
         self.hero = heroStats # Set the hero stats back to normal after fight.
 
     def GameLoop(self):
-        for i in range(4):
+        for i in range(10):
             self.enemy = hero.Enemy()
             print(f"\n\tA {self.enemy.name} appears!")
             self.combatLoop()
