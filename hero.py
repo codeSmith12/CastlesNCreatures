@@ -58,7 +58,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.items = []
         self.gold = 0
         self.critChance = 25
-        self.curWeapon = Item("Basic weapon", 0, "Basic weapon", "Hero", 0, 0)
+        self.curWeapon = Item("Basic weapon", 0, "Basic weapon", "Hero", 0, 0, False)
 
     def attackAbility(self, enemy):
         pass
@@ -67,22 +67,14 @@ class Hero: # Generic class Hero will describe a person of greater power.
     def buffAbility(self): # Offensive buffs >?
         pass
 
-    def goToShop(self):
-        print(f"{self.name} enters the shop.")
-        while True:
-            choice = input(" 1) Buy\n 2) Sell\n 3) Exit")
-            if choice == "3" or choice == "":
-                return
-            elif choice == "1":
-                pass # Display Shop. Will it be a separate class? I think so...
-            elif choice == "2":
-                pass # Display all items, and their prices. Sell price should be contained in class.
+ # Display all items, and their prices. Sell price should be contained in class.
 
 
     # Function that allows us to change weapons, called outside of combat
     def changeEquiptment(self):
         # While input isn't "", list each item
         while True:
+            print(f"Currently equipt: {self.curWeapon.name} - {self.curWeapon.description}")
             for i in range(len(self.equiptment)):
                 print(f"{i+1}: {self.equiptment[i].name} - {self.equiptment[i].description}\n")
             choice = input("Enter the number of the item you'd like to equipt. Press enter for no item.\n")
@@ -111,7 +103,9 @@ class Hero: # Generic class Hero will describe a person of greater power.
                         self.attackDamage += self.equiptment[choice].amount
                         print(f"\n{self.name} equipts {self.equiptment[choice].name}. Their attack damage is now {self.attackDamage}")
                     # Place weapon in weapon slot
+                    self.equiptment.append(self.curWeapon)
                     self.curWeapon = self.equiptment[choice]
+                    self.equiptment.remove(self.equiptment[choice])
                     return
                 else: # Print message if they chose an item that isn't part of their class
                     print(f"\nThis weapon is meant for a {self.equiptment[choice].stat}.")
@@ -237,7 +231,7 @@ class Warrior(Hero):
         print(f"{self.name} beats on their chest in a rhythm while shouting vigorously")
         self.magica -= 25
         self.damageBuffAmount += 2
-        self.attackDamageRange = 5
+        self.attackDamageRange += 2
         print(f"{self.name}\'s attack damage increased to {self.attackDamage + self.damageBuffAmount}")
 
 

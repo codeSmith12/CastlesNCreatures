@@ -33,6 +33,90 @@ repeat with + level difficulty
 
 '''
 
+class Shop():
+    def __init__(self, weaponTable, consumables):
+        self.weaponTable = weaponTable
+        self.consumables = consumables
+        self.gold = randint(350, 1000)
+        self.itemsToSell = []
+        self.populateItems()
+
+    def populateItems(self):
+        for i in range(3):
+            self.itemsToSell.append(choice(self.weaponTable))
+            self.itemsToSell.append(choice(self.consumables))
+        self.itemsToSell.sort(key=self.sortByName)
+
+    def buyMenu(self,hero):
+        while True:
+            print(f"Gold: {hero.gold}")
+            for i in range(len(self.itemsToSell)):
+                print(f"{i+1}) {self.itemsToSell[i].name} - {self.itemsToSell[i].sellPrice*15}")
+            choice = input("Enter the number of the item you'd like to buy, hit enter to leave: ")
+            if choice == "":
+                return
+            elif int(choice) < 1 or int(choice) > len(self.itemsToSell):
+                print("Please enter a valid number")
+            else: # They'd like to purchase a valid item
+                item = self.itemsToSell[int(choice)-1]
+                price = item.sellPrice*15
+                if hero.gold >= price:
+                    if item and item.isConsumable:
+                        hero.gold -= price
+                        hero.items.append(item)
+                        self.itemsToSell.remove(item)
+                    elif not item.isConsumable:
+                        hero.gold -= price
+                        hero.equiptment.append(item)
+                        self.itemsToSell.remove(item)
+                else:
+                    print(f"{hero.name} doesn't have enough gold.")
+    def sellMenu(self,hero):
+        while True:
+
+            # Gather every item the user has for selling.
+            totalItems = []
+            for item in hero.equiptment:
+                totalItems.append(item)
+            for item in hero.items:
+                totalItems.append(item)
+
+            totalItems.sort(key=self.sortByName)
+
+            print(f"Gold: {hero.gold}")
+            for i in range(len(totalItems)):
+                print(f"{i+1}) {totalItems[i].name} - {totalItems[i].sellPrice}")
+            choice = input("Enter the number of the item you'd like to sell, hit enter to leave: ")
+            if choice == "":
+                return
+            elif int(choice) < 1 or int(choice) > len(totalItems):
+                print("Please enter a valid number")
+            else: # They'd like to sell a valid item
+                item = totalItems[int(choice)-1]
+                if item and item.isConsumable:
+                        hero.gold += item.sellPrice
+                        hero.items.remove(item)
+                        self.itemsToSell.append(item)
+                elif not item.isConsumable:
+                        hero.gold += item.sellPrice
+                        hero.equiptment.remove(item)
+                        self.itemsToSell.append(item)
+
+    def shopMenu(self, hero):
+        print(f"{hero.name} enters the shop.")
+        while True:
+            choice = input(" 1) Buy\n 2) Sell\n 3) Exit\n")
+            if choice == "3" or choice == "":
+                return
+            elif choice == "1":
+                self.buyMenu(hero)
+            elif choice == "2":
+                self.sellMenu(hero)
+
+
+    def sortByName(self, x):
+        return x.name
+
 
 class GameMaster():
     def __init__(self):
@@ -41,29 +125,28 @@ class GameMaster():
 
     def createLootTable(self):
         self.weaponLootTable = [
-
             # TODO: Add an item that can only be found in shop with random chance, VERY expensive, but VERY good ? Maybe a potion of perma +stat or something?
             # Or another weapon that anyone can use ?? idk...
             # Item name: (drop chance/100, "description", "stat", buffAmount, sell price )
-            Item("Fire Sword", 35, "A magic sword engulfed in flames. Adds 5 to attack damage.", "Warrior", 5, 20),
-            Item("Chaos Sword", 20, "An epic sword that ensues chaos around the weilder. Adds 12 to attack damage.", "Warrior", 12, 30),
-            Item("Master Sword", 10, "A legendary sword that only a combat master can weild. Adds 20 to attack damage.", "Warrior", 20, 40),
-            Item("Ice Staff", 35, "A magic staff made of enchanted ice. Adds 5 to spell damage.", "Magi", 5, 20),
-            Item("Vortex Staff", 20, "An epic staff made of swirling energy. Adds 12 to spell damage.", "Magi", 12, 30),
-            Item("Master Staff", 10, "A legendary staff crafted by the gods. Adds 20 to spell damage.", "Magi", 20, 40),
-            Item("Lightning Bow", 35, "A magic bow that enchants each arrow it shoots with lightning. Adds 5 to attack damage.", "Ranger", 5, 20),
-            Item("Holy Bow", 20, "An epic bow that shoots bolts of holy light. Adds 12 to attack damage.", "Ranger", 12, 30),
-            Item("Master Bow", 10, "A legendary bow that was crafted by the gods. Adds 20 to attack damage.", "Ranger", 20, 40),
+            Item("Fire Sword", 35, "A magic sword engulfed in flames. Adds 5 to attack damage.", "Warrior", 5, 20, False),
+            Item("Chaos Sword", 20, "An epic sword that ensues chaos around the weilder. Adds 12 to attack damage.", "Warrior", 12, 45, False),
+            Item("Master Sword", 10, "A legendary sword that only a combat master can weild. Adds 20 to attack damage.", "Warrior", 20, 60, False),
+            Item("Ice Staff", 35, "A magic staff made of enchanted ice. Adds 5 to spell damage.", "Magi", 5, 20, False),
+            Item("Vortex Staff", 20, "An epic staff made of swirling energy. Adds 12 to spell damage.", "Magi", 12, 45, False),
+            Item("Master Staff", 10, "A legendary staff crafted by the gods. Adds 20 to spell damage.", "Magi", 20, 60, False),
+            Item("Lightning Bow", 99, "A magic bow that enchants each arrow it shoots with lightning. Adds 5 to attack damage.", "Ranger", 5, 20, False),
+            Item("Holy Bow", 20, "An epic bow that shoots bolts of holy light. Adds 12 to attack damage.", "Ranger", 12, 45, False),
+            Item("Master Bow", 10, "A legendary bow that was crafted by the gods. Adds 20 to attack damage.", "Ranger", 20, 60, False),
         ]
 
         self.consumableLootTable = [
-            Item("Health Potion", 75, "A potion that can be used in battle to restore 50 health points. Obviously.", "health", 50, 5),
-            Item("Mana Potion", 75, "A potion that can be used in battle to restore 50 mana points. Obviously.", "magica", 50, 5),
-            Item("Evasion Talisman", 25, "Permanently increases Dexterity by 10.", "dexterity", 10, 5),
-            Item("Armor Talisman", 25, "Permanently increases armor by 4.", "armor", 4, 5),
-            Item("Max Health Talisman", 25, "Permanently increases Max Health by 15.", "maxHealth", 15, 5),
-            Item("Max Mana Talisman", 25, "Permanently increases Max Mana by 15.", "maxMagica", 25, 5),
-            Item("Lucky Talisman", 10, "Permanently increases critical strike chance by 10.", "critChance", 15, 100),
+            Item("Health Potion", 75, "A potion that can be used in battle to restore 50 health points. Obviously.", "health", 50, 5, True),
+            Item("Mana Potion", 75, "A potion that can be used in battle to restore 50 mana points. Obviously.", "magica", 50, 5, True),
+            Item("Evasion Talisman", 25, "Permanently increases Dexterity by 10.", "dexterity", 10, 10, True),
+            Item("Armor Talisman", 25, "Permanently increases armor by 4.", "armor", 4, 10, True),
+            Item("Max Health Talisman", 25, "Permanently increases Max Health by 15.", "maxHealth", 15, 10, True),
+            Item("Max Mana Talisman", 25, "Permanently increases Max Mana by 15.", "maxMagica", 25, 10, True),
+            Item("Lucky Talisman", 10, "Permanently increases critical strike chance by 10.", "critChance", 15, 30, True),
         ]
 
     def characterCreation(self):
@@ -177,16 +260,20 @@ class GameMaster():
         self.hero = heroStats # Set the hero stats back to normal after fight.
 
     def outOfCombatMenu(self):
+        self.shop = Shop(self.weaponLootTable, self.consumableLootTable)
         while True:
             choice = input("\n1) Continue\n2) Change equiptment\n3) Use item \n4) Shop\n")
             if choice == "" or choice == "1":
+                del self.shop
                 return
             elif choice == "2":
                 self.hero.changeEquiptment()
             elif choice == "3":
                 self.hero.useChosenItem()
             elif choice == "4":
-                self.hero.goToShop()
+                self.shop.shopMenu(self.hero)
+
+                # self.hero.goToShop()
 
     def GameLoop(self):
         # Level 1 enemy list, pull from level 2 after X amount of fights or something.
