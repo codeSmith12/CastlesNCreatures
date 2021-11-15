@@ -56,7 +56,7 @@ class Hero: # Generic class Hero will describe a person of greater power.
         self.armor = 4
         self.equiptment = []
         self.items = []
-        self.gold = 0
+        self.gold = 5000
         self.critChance = 25
         self.curWeapon = Item("Basic weapon", 0, "Basic weapon", "Hero", 0, 0, False)
 
@@ -66,15 +66,16 @@ class Hero: # Generic class Hero will describe a person of greater power.
         pass
     def buffAbility(self): # Offensive buffs >?
         pass
+    def passiveAbility(self): # Example, every time mage kills something, gain +2 to spell damage.
+        pass
 
- # Display all items, and their prices. Sell price should be contained in class.
 
 
     # Function that allows us to change weapons, called outside of combat
     def changeEquiptment(self):
         # While input isn't "", list each item
         while True:
-            print(f"Currently equipt: {self.curWeapon.name} - {self.curWeapon.description}")
+            print(f"Currently equipt: {self.curWeapon.name} - {self.curWeapon.description}\n")
             for i in range(len(self.equiptment)):
                 print(f"{i+1}: {self.equiptment[i].name} - {self.equiptment[i].description}\n")
             choice = input("Enter the number of the item you'd like to equipt. Press enter for no item.\n")
@@ -133,20 +134,20 @@ class Hero: # Generic class Hero will describe a person of greater power.
         else:
             stat = getattr(self, item.stat) # Grab the stat the item is increasing
             if item.stat == "health":
+                if self.health == self.maxHealth:
+                    print(f"{self.name} is already at full health.")
+                    return
                 self.health += item.amount# Increase the stat by that amount.
                 if self.health > self.maxHealth:
                     self.health = self.maxHealth
-                elif self.health == self.maxHealth:
-                    print(f"{self.name} is already at full health.")
-                    return
                 print(f"{self.name} is now at {self.health} health.")
             elif item.stat == "magica":
+                if self.magica == self.maxMagica:
+                    print(f"{self.name} is already at full magica.")
+                    return
                 self.magica += item.amount# Increase the stat by that amount.
                 if self.magica > self.maxMagica:
                     self.magica = self.maxMagica
-                elif self.magica == self.maxMagica:
-                    print(f"{self.name} is already at full magica.")
-                    return
                 print(f"{self.name} is now at {self.magica} magica.")
             elif item.stat == "dexterity":
                 self.dexterity += item.amount
@@ -194,9 +195,11 @@ class Warrior(Hero):
         self.attackDamageRange = 5
         self.damageBuffAmount = 0
         self.damageBuffRange = 0
-        self.armor = 4
+        self.armor = 6
         self.critChance = 20
         self.dexterity = 45
+        self.counterAttackChance = 15
+        self.doubleStrikeChance = 10 # WINDFURY IDEA !!!
 
     def attackAbility(self,enemy):
         hitChance = randint(self.dexterity, 100)
@@ -221,18 +224,27 @@ class Warrior(Hero):
         else:
             print(f"{self.name}\'s attack missed\n")
 
+        if enemy.health > 0:
+            doubleStrike = randint(0,100)
+            print(f"Rolled {doubleStrike} towards double strike.")
+            if doubleStrike > 100-self.doubleStrikeChance:
+                print(f"{self.name} strikes again!\n")
+                self.attackAbility(enemy)
+                if enemy.health < 0:
+                    return
+
     def defensiveAbility(self):
-        self.magica -= 25
         print(f"{self.name} blesses their shield with an ancient chant")
+        self.magica -= 25
         self.armor += 3
         print(f"Armor has increased to {self.armor}")
 
     def buffAbility(self):
         print(f"{self.name} beats on their chest in a rhythm while shouting vigorously")
         self.magica -= 25
-        self.damageBuffAmount += 2
-        self.attackDamageRange += 2
-        print(f"{self.name}\'s attack damage increased to {self.attackDamage + self.damageBuffAmount}")
+        self.doubleStrikeChance += 4
+        self.counterAttackChance += 4
+        print(f"{self.name}\'s chance to double strike and counter attack have increased to {self.doubleStrikeChance} and {self.counterAttackChance}.")
 
 
     def displayAttacks(self):
@@ -253,12 +265,15 @@ Magi Class:
 
 Notes:
  Currently no scaling...
+ add passives to heros?????
+ When holding master staff, every 3rd attack is a crit ?
+ Mage crits harder
 
 '''
 class Magi(Hero):
     def __init__(self):
         super().__init__()
-        self.spellDamage = 14 # 21 - > 24?
+        self.spellDamage = 13 # 21 - > 24?
         self.maxMagica = 150
         self.maxHealth = 100
         self.health = self.maxHealth
@@ -277,15 +292,15 @@ class Magi(Hero):
             print(f"{self.name} critically strikes {enemy.name}")
         else:
             critDamage = 1
-        if not self.buffActivated:
-            damage = ceil(randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage)
-            print(f"{self.name} launches a fireball at {enemy.name} and deals {damage} damage")
-            enemy.health -= damage
-        else:
-            damage = randint(ceil(self.spellDamage*1.75), ceil(self.spellDamage*1.75) + self.attackDamageRange) * critDamage
-            print(f"A massive fireball erupts from {self.name}, striking {enemy.name} for {damage} damage")
-            enemy.health -= damage
-            self.buffActivated = False
+        # if not self.buffActivated:
+        damage = ceil(randint(self.spellDamage, self.spellDamage + self.attackDamageRange) * critDamage)
+        print(f"{self.name} launches a fireball at {enemy.name} and deals {damage} damage")
+        enemy.health -= damage
+        # else:
+        #     damage = randint(ceil(self.spellDamage*1.75), ceil(self.spellDamage*1.75) + self.attackDamageRange) * critDamage
+        #     print(f"A massive fireball erupts from {self.name}, striking {enemy.name} for {damage} damage")
+        #     enemy.health -= damage
+        #     self.buffActivated = False
 
         print(f"{enemy.name}\'s health is now {enemy.health}")
 
@@ -298,7 +313,10 @@ class Magi(Hero):
     def buffAbility(self):
         self.magica -= 25
         print(f"Energy begins to swirl around {self.name}.")
-        self.buffActivated = True
+        self.spellDamage += 2
+        self.attackDamageRange += 1
+        print(f"{self.name}\'s spell damage is now {self.spellDamage}")
+        # self.buffActivated = True
 
     def displayAttacks(self):
         print('''
@@ -315,7 +333,7 @@ class Magi(Hero):
 class Ranger(Hero):
     def __init__(self):
         super().__init__()
-        self.maxMagica = 75
+        self.maxMagica = 50
         self.maxHealth = 90
         self.health = self.maxHealth
         self.magica = self.maxMagica
@@ -334,10 +352,10 @@ class Ranger(Hero):
             rollCrit = randint(0, 100)
             if rollCrit > 100 - self.critChance:
                 critDamage = 1.8
-                print(f"{self.name} critically hits {enemy.name}.")
+                print(f"{self.name} critically hits {enemy.name} with an arrow.")
             else:
                 critDamage = 1
-                print(f"{self.name} hits {enemy.name}.")
+                print(f"{self.name} hits {enemy.name} with an arrow.")
             # Calculate true damage
             damage = randint(self.attackDamage + self.damageBuffAmount, self.attackDamage + self.damageBuffRange + self.attackDamageRange)
             # Calculate final damage
@@ -380,6 +398,8 @@ class Ranger(Hero):
         return attack
 
         # Need to make an enemy that has ability to ignore armor ?
+        # TODO: ADD printout of enemy at the beginning of combat loop?
+        # Maybe for at least debugging purposes...
 class Enemy:
     def __init__(self, name, health, attack, range, spellDmg, dex, attackType, arm, dropRate, spawn):
         self.name = name
@@ -397,12 +417,9 @@ class Enemy:
         print(f"{self.name} {self.attackType} {hero.name}.")
         if  hasattr(hero, "evasionCharges") and hero.evasionCharges>0:
             hitChance = randint(self.dexterity-20, 80)
-            hero.evasionCharges -= 1
-            print(f"{hero.name} has {hero.evasionCharges} evasion charges left.")
         else:
             hitChance = randint(self.dexterity, 100)
-
-        # If hero is Warrior and has used Shield Buff, attack is absorbed by shield, buff is toggled off
+        # If hero is Magi and has used ice shield Buff, attack is absorbed by shield, buff is toggled off
         if  hasattr(hero, "shieldCharges") and hero.shieldCharges > 0:
              print(f"{self.name}\'s attack was absorbed by {hero.name}\'s ice shield.")
              hero.shieldCharges -= 1
@@ -411,8 +428,19 @@ class Enemy:
             if damage <=0:
                 print(f"\n{hero.name} blocked the attack.")
             else:
+                # attack hero, deal damage
                 print(f"\n{self.name} strikes {hero.name} for {damage}")
                 hero.health -= damage
+
+                #Warrior counter attack
+                counterAttack = randint(0,100)
+                if hasattr(hero, "counterAttackChance") and counterAttack > 100-hero.counterAttackChance:
+                    print(f"{hero.name} counter attacks for {int(damage/2)}!")
+                    self.health -= int(damage/2)
+
                 print(f"{hero.name} is at {hero.health} health.")
         else:
             print(f"\n{self.name}\'s attack missed.")
+            if hero.evasionCharges > 0:
+                hero.evasionCharges -= 1
+                print(f"{hero.name} has {hero.evasionCharges} evasion charges left.")
